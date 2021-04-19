@@ -1,17 +1,21 @@
 plugins {
+    kotlin("jvm") version "1.4.20" apply false
     java
-    kotlin("jvm") version "1.4.32"
     `kotlin-dsl`
 }
 
 allprojects {
-    group = "io.insinuate"
+    group = "cn.insinuate"
     version = "0.1.0".let {
         if (rootProject.tasks.names.contains("release")) {
             return@let it
         } else {
             return@let "${it}-SNAPSHOT"
         }
+    }
+
+    tasks.withType<JavaCompile> {
+        version = "1.8"
     }
 }
 
@@ -37,14 +41,9 @@ extra.apply {
 }
 
 repositories {
-    jcenter()
     mavenCentral()
 }
 
-task("release") {
+tasks.register("release") {
 
-}
-
-dependencies {
-    testCompile("junit", "junit", "4.12")
 }

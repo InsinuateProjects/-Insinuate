@@ -23,6 +23,7 @@ tasks.withType<Jar> {
         exclude("org.jetbrains.kotlin:kotlin-stdlib")
         exclude("org.jetbrains.kotlin:kotlin-stdlib-common")
     }
+
     archiveClassifier.set(null)
 }
 
