@@ -1,5 +1,6 @@
-package io.insinuate.insinuate.build
+package cn.insinuate.gradle.build
 
+import org.gradle.kotlin.dsl.*
 import java.net.URI
 
 plugins {

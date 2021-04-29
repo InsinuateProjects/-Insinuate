@@ -1,14 +1,15 @@
 plugins {
     java
     kotlin("jvm")
-//    id("cn.insinuate.gradle.build.publishing")
 }
 
 repositories {
     mavenCentral()
+    mavenLocal()
+    maven("https://maven.aliyun.com/repository/central/")
 }
 
 dependencies {
-    implementation("org.spongepowered:configurate-yaml:4.0.0")
     testImplementation("junit", "junit", "4.12")
+    implementation("org.ow2.asm:asm:9.1")
 }

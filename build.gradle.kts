@@ -1,5 +1,5 @@
 plugins {
-    kotlin("jvm") version "1.4.20" apply false
+    kotlin("jvm") version "1.5.0"
     java
     `kotlin-dsl`
 }
@@ -7,9 +7,10 @@ plugins {
 allprojects {
     group = "cn.insinuate"
     version = "0.1.0".let {
-        if (rootProject.tasks.names.contains("release")) {
+        try {
+            rootProject.tasks.getByName("release")
             return@let it
-        } else {
+        } catch (t: Throwable) {
             return@let "${it}-SNAPSHOT"
         }
     }
