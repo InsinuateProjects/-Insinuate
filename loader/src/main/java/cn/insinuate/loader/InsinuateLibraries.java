@@ -2,7 +2,6 @@ package cn.insinuate.loader;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 
 import cn.insinuate.loader.maven.MavenArtifact;
 import cn.insinuate.loader.utils.Pair;
@@ -18,16 +17,4 @@ public class InsinuateLibraries {
             ))
     );
 
-    private static InsinuateLibraries instance;
-
-    public InsinuateLibraries() {
-        if (instance != null) {
-            throw
-        }
-        instance = this;
-    }
-
-    public static InsinuateLibraries getInstance() {
-        return instance;
-    }
 }

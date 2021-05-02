@@ -1,9 +1,15 @@
 package cn.insinuate.loader.maven;
 
+import cn.insinuate.loader.utils.IO;
 import cn.insinuate.loader.utils.Pair;
-import org.objectweb.asm.*;
+import org.objectweb.asm.ClassReader;
+import org.objectweb.asm.ClassVisitor;
+import org.objectweb.asm.ClassWriter;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.*;
@@ -23,6 +29,11 @@ public class MavenArtifact {
 
     public File file;
 
+    private final List<String> defaultRepositories = Arrays.asList(
+            "https://repo.maven.apache.org/maven2",
+            "https://repo1.maven.org/maven2/",
+            "https://maven.aliyun.com/nexus/content/groups/public/"
+        );
 
     public MavenArtifact(String groupId, String artifactId, String version, Pair<String, String> relocate, String... repositories) {
         this(null, groupId, artifactId, version, relocate, repositories);
@@ -53,7 +64,7 @@ public class MavenArtifact {
         file = new File(folder, artifactId + "-" + version + ".jar");
 
         this.repositories.addAll(Arrays.asList(repositories));
-        this.repositories.add("https://maven.aliyun.com/nexus/content/groups/public/");
+        this.repositories.addAll(defaultRepositories);
     }
 
     public MavenArtifact(String combined, Pair<String, String> relocate, String... repositories) {
@@ -86,7 +97,7 @@ public class MavenArtifact {
         file = new File(folder, artifactId + "-" + version + ".jar");
 
         this.repositories.addAll(Arrays.asList(repositories));
-        this.repositories.add("https://maven.aliyun.com/nexus/content/groups/public/");
+        this.repositories.addAll(defaultRepositories);
     }
 
     public String toURL(String repository) {
@@ -110,9 +121,16 @@ public class MavenArtifact {
         return false;
     }
 
+    private String toURL() {
+        return groupId.replace(".", "/") + "/" +
+                artifactId + "/" +
+                version + "/" +
+                artifactId + "-" + version + ".jar";
+    }
+
     public boolean download(String repository) {
         try {
-            URL url = new URL(repository);
+            URL url = new URL(toURL(repository));
 
             if (file.exists()) {
                 return false;
@@ -123,7 +141,7 @@ public class MavenArtifact {
             httpURLConnection.setRequestProperty("User-Agent", "Mozilla/4.0 (compatible; MSIE 5.0; Windows NT; DigExt)");
 
             InputStream inputStream = httpURLConnection.getInputStream();
-            byte[] bytes = readInputStream(inputStream);
+            byte[] bytes = IO.readInputStream(inputStream);
 
             FileOutputStream fileOutputStream = new FileOutputStream(file);
             fileOutputStream.write(bytes);
@@ -131,14 +149,13 @@ public class MavenArtifact {
             inputStream.close();
             return true;
         } catch (Throwable ignored) {
-
+            return false;
         }
-        return false;
     }
 
     private boolean startsWith(String name) {
-        for (Map.Entry<String, String> entry : relocates.entrySet()) {
-            if (name.startsWith(entry.getKey())) return true;
+        for (String key : relocates.keySet()) {
+            if (name.startsWith(key)) return true;
         }
         return false;
     }
@@ -147,20 +164,28 @@ public class MavenArtifact {
         JarFile jarFile;
         FileOutputStream fileOutputStream;
         JarOutputStream jarOutputStream;
+        File coped = new File(file.getName() + ".relocate");
+        IO.deepDelete(coped);
+        IO.copy(file, coped);
+        IO.deepDelete(file);
         try {
-            jarFile = new JarFile(file);
-            fileOutputStream = new FileOutputStream(jarFile.getName(), true);
+            jarFile = new JarFile(coped);
+            fileOutputStream = new FileOutputStream(file);
             jarOutputStream = new JarOutputStream(fileOutputStream);
+            jarOutputStream.setMethod(JarOutputStream.DEFLATED);
         } catch (IOException ignored) {
             return false;
         }
         Enumeration<JarEntry> entries = jarFile.entries();
         while (entries.hasMoreElements()) {
             try {
-
                 JarEntry jarEntry = entries.nextElement();
-                if (!jarEntry.getName().endsWith(".class"))
+
+                if (jarEntry.getName().startsWith("META-INF/") || !jarEntry.getName().endsWith(".class")) {
+                    jarOutputStream.putNextEntry(jarEntry);
+                    jarOutputStream.write(IO.readInputStream(jarFile.getInputStream(jarEntry)));
                     continue;
+                }
 
                 ClassReader classReader = new ClassReader(jarFile.getInputStream(jarEntry));
                 ClassWriter classWriter = new ClassWriter(classReader, 0);
@@ -190,24 +215,18 @@ public class MavenArtifact {
                 }
                 jarOutputStream.write(bytes);
 
-                jarEntry.setExtra(bytes);
+//                jarEntry.setExtra(bytes);
             } catch (Throwable ignored) {
                 return false;
             }
         }
 
         try {
-            jarOutputStream.close();
-        } catch (IOException ignored) {
-            return false;
-        }
-        try {
-            fileOutputStream.close();
-        } catch (IOException ignored) {
-            return false;
-        }
-        try {
             jarFile.close();
+            IO.deepDelete(coped);
+            jarOutputStream.flush();
+            jarOutputStream.close();
+            fileOutputStream.close();
         } catch (IOException ignored) {
             return false;
         }
@@ -215,15 +234,5 @@ public class MavenArtifact {
         return true;
     }
 
-    private static byte[] readInputStream(InputStream inputStream) throws IOException {
-        byte[] buffer = new byte[1024];
-        int len;
-        ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        while ((len = inputStream.read(buffer)) != -1) {
-            bos.write(buffer, 0, len);
-        }
-        bos.close();
-        return bos.toByteArray();
-    }
 
 }

@@ -6,7 +6,7 @@ plugins {
 repositories {
     mavenCentral()
     mavenLocal()
-    maven("https://maven.aliyun.com/repository/central/")
+    maven("https://repository.ow2.org/nexus/content/repositories/releases/")
 }
 
 dependencies {
