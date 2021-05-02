@@ -2,6 +2,7 @@ plugins {
     kotlin("jvm") version "1.5.0"
     java
     `kotlin-dsl`
+    id("com.github.johnrengelman.shadow") version "6.1.0" apply false
 }
 
 allprojects {

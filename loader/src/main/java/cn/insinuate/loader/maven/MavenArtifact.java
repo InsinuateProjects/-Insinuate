@@ -181,8 +181,26 @@ public class MavenArtifact {
             try {
                 JarEntry jarEntry = entries.nextElement();
 
+                String entryName = jarEntry.getName().replace("/", ".");
+                entryName = entryName.substring(0, entryName.lastIndexOf("."));
+                boolean startsWith = startsWith(entryName);
+
+                String finallyName = jarEntry.getName();
+
+                for (Map.Entry<String, String> relocate : relocates.entrySet()) {
+                    String string = finallyName.replaceFirst(relocate.getKey(), relocate.getValue());
+                    if (!finallyName.equals(string)) {
+                        finallyName = string;
+                        break;
+                    }
+                }
+
                 if (jarEntry.getName().startsWith("META-INF/") || !jarEntry.getName().endsWith(".class")) {
-                    jarOutputStream.putNextEntry(jarEntry);
+                    if (startsWith) {
+                        jarOutputStream.putNextEntry(new JarEntry(finallyName));
+                    } else {
+                        jarOutputStream.putNextEntry(jarEntry);
+                    }
                     jarOutputStream.write(IO.readInputStream(jarFile.getInputStream(jarEntry)));
                     continue;
                 }
@@ -195,20 +213,7 @@ public class MavenArtifact {
 
                 byte[] bytes = classWriter.toByteArray();
 
-                String entryName = jarEntry.getName().replace("/", ".");
-                entryName = entryName.substring(0, entryName.lastIndexOf("."));
-
-                if (startsWith(entryName)) {
-                    String finallyName = jarEntry.getName();
-
-                    for (Map.Entry<String, String> relocate : relocates.entrySet()) {
-                        String string = finallyName.replaceFirst(relocate.getKey(), relocate.getValue());
-                        if (!finallyName.equals(string)) {
-                            finallyName = string;
-                            break;
-                        }
-                    }
-
+                if (startsWith) {
                     jarOutputStream.putNextEntry(new JarEntry(finallyName));
                 } else {
                     jarOutputStream.putNextEntry(jarEntry);

@@ -1,6 +1,7 @@
 plugins {
     java
     kotlin("jvm")
+    id("com.github.johnrengelman.shadow")
 }
 
 repositories {
@@ -13,6 +14,7 @@ repositories {
 
 dependencies {
     compileOnly(project(":core"))
+    compileOnly(project(":loader"))
     compileOnly(project(":utils"))
     compileOnly("org.spigotmc:spigot-api:1.16.5-R0.1-SNAPSHOT")
 }
