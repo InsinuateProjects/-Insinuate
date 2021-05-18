@@ -1,6 +1,7 @@
-package cn.insinuate.loader.utils;
+package cn.insinuate.utils;
 
 import java.io.*;
+import java.net.HttpURLConnection;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.channels.FileChannel;
@@ -38,9 +39,19 @@ public class IO {
     }
 
     public static boolean downloadFile(String in, File file) {
-        try (InputStream inputStream = new URL(in).openStream(); BufferedInputStream bufferedInputStream = new BufferedInputStream(inputStream)) {
-            toFile(bufferedInputStream, file);
-            return true;
+        try {
+            URL url = new URL(in);
+            HttpURLConnection httpURLConnection = (HttpURLConnection) url.openConnection();
+            httpURLConnection.setConnectTimeout(20 * 1000);
+            httpURLConnection.setRequestProperty("User-Agent", "Mozilla/4.0 (compatible; MSIE 5.0; Windows NT; DigExt)");
+
+            InputStream inputStream = httpURLConnection.getInputStream();
+            byte[] bytes = IO.readInputStream(inputStream);
+
+            FileOutputStream fileOutputStream = new FileOutputStream(file);
+            fileOutputStream.write(bytes);
+            fileOutputStream.close();
+            inputStream.close();
         } catch (Throwable t) {
             t.printStackTrace();
         }

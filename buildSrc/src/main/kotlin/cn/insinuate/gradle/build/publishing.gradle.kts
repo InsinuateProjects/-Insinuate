@@ -9,7 +9,7 @@ plugins {
 
 val archiveName = "insinuate-${name.toLowerCase()}"
 
-val nexusUrl = "http://mc3.roselle.vip:606/repository"
+val nexusUrl = "http://repo.iroselle.com/repository"
 
 tasks {
     val sourceJar by registering(Jar::class) {

@@ -1,7 +1,7 @@
 plugins {
     java
     kotlin("jvm")
-//    id("cn.insinuate.gradle.build.publishing")
+    id("cn.insinuate.gradle.build.publishing")
 }
 
 repositories {

@@ -1,4 +1,4 @@
-package cn.insinuate.loader.utils;
+package cn.insinuate.utils;
 
 import java.util.HashMap;
 import java.util.List;

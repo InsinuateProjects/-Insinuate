@@ -1,4 +1,12 @@
 package cn.insinuate.loader.bukkit;
 
-public class Plugin extends BukkitPlugin {
+import cn.insinuate.loader.PluginBase;
+import org.bukkit.plugin.java.JavaPlugin;
+
+public class Plugin extends JavaPlugin implements PluginBase {
+
+    public Plugin() {
+
+    }
+
 }

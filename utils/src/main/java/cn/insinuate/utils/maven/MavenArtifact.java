@@ -1,7 +1,7 @@
-package cn.insinuate.loader.maven;
+package cn.insinuate.utils.maven;
 
-import cn.insinuate.loader.utils.IO;
-import cn.insinuate.loader.utils.Pair;
+import cn.insinuate.utils.IO;
+import cn.insinuate.utils.Pair;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.ClassWriter;
@@ -24,16 +24,14 @@ public class MavenArtifact {
     public final String artifactId;
     public final String version;
 
-    public List<String> repositories = new ArrayList<>();
-    public Map<String, String> relocates;
-
-    public File file;
-
-    private final List<String> defaultRepositories = Arrays.asList(
+    public List<String> repositories = Arrays.asList(
             "https://repo.maven.apache.org/maven2",
             "https://repo1.maven.org/maven2/",
             "https://maven.aliyun.com/nexus/content/groups/public/"
-        );
+    );
+    public Map<String, String> relocates;
+
+    public File file;
 
     public MavenArtifact(String groupId, String artifactId, String version, Pair<String, String> relocate, String... repositories) {
         this(null, groupId, artifactId, version, relocate, repositories);
@@ -63,8 +61,7 @@ public class MavenArtifact {
         this.version = version;
         file = new File(folder, artifactId + "-" + version + ".jar");
 
-        this.repositories.addAll(Arrays.asList(repositories));
-        this.repositories.addAll(defaultRepositories);
+        this.repositories.addAll(0, Arrays.asList(repositories));
     }
 
     public MavenArtifact(String combined, Pair<String, String> relocate, String... repositories) {
@@ -96,8 +93,7 @@ public class MavenArtifact {
         this.version = split[2];
         file = new File(folder, artifactId + "-" + version + ".jar");
 
-        this.repositories.addAll(Arrays.asList(repositories));
-        this.repositories.addAll(defaultRepositories);
+        this.repositories.addAll(0, Arrays.asList(repositories));
     }
 
     public String toURL(String repository) {
@@ -129,28 +125,7 @@ public class MavenArtifact {
     }
 
     public boolean download(String repository) {
-        try {
-            URL url = new URL(toURL(repository));
-
-            if (file.exists()) {
-                return false;
-            }
-
-            HttpURLConnection httpURLConnection = (HttpURLConnection) url.openConnection();
-            httpURLConnection.setConnectTimeout(20 * 1000);
-            httpURLConnection.setRequestProperty("User-Agent", "Mozilla/4.0 (compatible; MSIE 5.0; Windows NT; DigExt)");
-
-            InputStream inputStream = httpURLConnection.getInputStream();
-            byte[] bytes = IO.readInputStream(inputStream);
-
-            FileOutputStream fileOutputStream = new FileOutputStream(file);
-            fileOutputStream.write(bytes);
-            fileOutputStream.close();
-            inputStream.close();
-            return true;
-        } catch (Throwable ignored) {
-            return false;
-        }
+        return IO.downloadFile(toURL(repository), file);
     }
 
     private boolean startsWith(String name) {
@@ -173,7 +148,8 @@ public class MavenArtifact {
             fileOutputStream = new FileOutputStream(file);
             jarOutputStream = new JarOutputStream(fileOutputStream);
             jarOutputStream.setMethod(JarOutputStream.DEFLATED);
-        } catch (IOException ignored) {
+        } catch (IOException e) {
+            e.printStackTrace();
             return false;
         }
         Enumeration<JarEntry> entries = jarFile.entries();
@@ -221,7 +197,8 @@ public class MavenArtifact {
                 jarOutputStream.write(bytes);
 
 //                jarEntry.setExtra(bytes);
-            } catch (Throwable ignored) {
+            } catch (Throwable e) {
+                e.printStackTrace();
                 return false;
             }
         }
@@ -232,7 +209,8 @@ public class MavenArtifact {
             jarOutputStream.flush();
             jarOutputStream.close();
             fileOutputStream.close();
-        } catch (IOException ignored) {
+        } catch (IOException e) {
+            e.printStackTrace();
             return false;
         }
 

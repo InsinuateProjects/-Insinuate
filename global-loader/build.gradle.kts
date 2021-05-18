@@ -12,4 +12,5 @@ repositories {
 dependencies {
     testImplementation("junit", "junit", "4.12")
     implementation("org.ow2.asm:asm:9.1")
+    compileOnly(project(":utils"))
 }

@@ -1,4 +1,4 @@
-package cn.insinuate.loader.maven;
+package cn.insinuate.utils.maven;
 
 import org.objectweb.asm.*;
 
