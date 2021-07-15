@@ -2,6 +2,8 @@ package io.insinuate.utils.maven;
 
 import io.insinuate.utils.IO;
 import io.insinuate.utils.Pair;
+import me.lucko.jarrelocator.JarRelocator;
+import me.lucko.jarrelocator.Relocation;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.ClassWriter;
@@ -25,7 +27,7 @@ public class MavenArtifact {
     public final String version;
 
     public List<String> repositories = new ArrayList<>();
-    public Map<String, String> relocates;
+    public List<Relocation> relocates;
 
     public File file;
 
@@ -38,34 +40,17 @@ public class MavenArtifact {
     public MavenArtifact(String groupId, String artifactId, String version, String... repositories) {
         this(null, groupId, artifactId, version, new ArrayList<>(), repositories);
     }
-    @Deprecated
-    public MavenArtifact(String groupId, String artifactId, String version, Pair<String, String> relocate, String... repositories) {
+    public MavenArtifact(String groupId, String artifactId, String version, Relocation relocate, String... repositories) {
         this(null, groupId, artifactId, version, relocate, repositories);
     }
-    @Deprecated
-    public MavenArtifact(String groupId, String artifactId, String version, List<Pair<String, String>> relocates, String... repositories) {
-        this(null, groupId, artifactId, version, relocates, repositories);
-    }
-    @Deprecated
-    public MavenArtifact(String groupId, String artifactId, String version, Map<String, String> relocates, String... repositories) {
+    public MavenArtifact(String groupId, String artifactId, String version, List<Relocation> relocates, String... repositories) {
         this(null, groupId, artifactId, version, relocates, repositories);
     }
 
-    @Deprecated
-    public MavenArtifact(File folder, String groupId, String artifactId, String version, Pair<String, String> relocate, String... repositories) {
-        this(folder, groupId, artifactId, version, Pair.pairToMap(relocate), repositories);
+    public MavenArtifact(File folder, String groupId, String artifactId, String version, Relocation relocate, String... repositories) {
+        this(folder, groupId, artifactId, version, Arrays.asList(relocate), repositories);
     }
-    @Deprecated
-    public MavenArtifact(File folder, String groupId, String artifactId, String version, List<Pair<String, String>> relocates, String... repositories) {
-        this(folder, groupId, artifactId, version, Pair.pairsToMap(relocates), repositories);
-    }
-
-    public static File customFolder(String name) {
-        return new File(".insinuate/libs/" + name);
-    }
-
-    @Deprecated
-    public MavenArtifact(File folder, String groupId, String artifactId, String version, Map<String, String> relocates, String... repositories) {
+    public MavenArtifact(File folder, String groupId, String artifactId, String version, List<Relocation> relocates, String... repositories) {
         this.relocates = relocates;
         if (folder == null) {
             this.folder = new File(".insinuate/libs/other");
@@ -81,35 +66,27 @@ public class MavenArtifact {
         this.repositories.addAll(defaultRepositories);
     }
 
+    public static File customFolder(String name) {
+        return new File(".insinuate/libs/" + name);
+    }
+
     public MavenArtifact(String combined, String... repositories) {
         this(null, combined, new ArrayList<>(), repositories);
     }
-    @Deprecated
-    public MavenArtifact(String combined, Pair<String, String> relocate, String... repositories) {
+    public MavenArtifact(String combined, Relocation relocate, String... repositories) {
         this(null, combined, relocate, repositories);
     }
-    @Deprecated
-    public MavenArtifact(String combined, List<Pair<String, String>> relocates, String... repositories) {
-        this(null, combined, relocates, repositories);
-    }
-    @Deprecated
-    public MavenArtifact(String combined, Map<String, String> relocates, String... repositories) {
+    public MavenArtifact(String combined, List<Relocation> relocates, String... repositories) {
         this(null, combined, relocates, repositories);
     }
 
     public MavenArtifact(File folder, String combined, String... repositories) {
         this(folder, combined, new ArrayList<>(), repositories);
     }
-    @Deprecated
-    public MavenArtifact(File folder, String combined, Pair<String, String> relocate, String... repositories) {
-        this(folder, combined, Pair.pairToMap(relocate), repositories);
+    public MavenArtifact(File folder, String combined, Relocation relocate, String... repositories) {
+        this(folder, combined, Arrays.asList(relocate), repositories);
     }
-    @Deprecated
-    public MavenArtifact(File folder, String combined, List<Pair<String, String>> relocates, String... repositories) {
-        this(folder, combined, Pair.pairsToMap(relocates), repositories);
-    }
-    @Deprecated
-    public MavenArtifact(File folder, String combined, Map<String, String> relocates, String... repositories) {
+    public MavenArtifact(File folder, String combined, List<Relocation> relocates, String... repositories) {
         this.relocates = relocates;
         if (folder == null) {
             this.folder = new File(".insinuate/libs");
@@ -147,12 +124,14 @@ public class MavenArtifact {
         return false;
     }
 
-    private String toURL() {
+    private String toURLFormat() {
         return groupId.replace(".", "/") + "/" +
                 artifactId + "/" +
                 version + "/" +
                 artifactId + "-" + version + ".jar";
     }
+
+
 
     public boolean download(String repository) {
         try {
@@ -179,90 +158,24 @@ public class MavenArtifact {
         }
     }
 
-    private boolean startsWith(String name) {
-        for (String key : relocates.keySet()) {
-            if (name.startsWith(key)) return true;
-        }
-        return false;
-    }
-
     public boolean relocate() {
-        JarFile jarFile;
-        FileOutputStream fileOutputStream;
-        JarOutputStream jarOutputStream;
-        File coped = new File(file.getName() + ".relocate");
-        IO.deepDelete(coped);
-        IO.copy(file, coped);
+        File input = new File(file.getName() + ".relocate");
+        IO.deepDelete(input);
+        IO.copy(file, input);
         IO.deepDelete(file);
+
+        JarRelocator jarRelocator = new JarRelocator(input, file, relocates);
+
+        boolean result;
         try {
-            jarFile = new JarFile(coped);
-            fileOutputStream = new FileOutputStream(file);
-            jarOutputStream = new JarOutputStream(fileOutputStream);
-            jarOutputStream.setMethod(JarOutputStream.DEFLATED);
-        } catch (IOException ignored) {
-            return false;
-        }
-        Enumeration<JarEntry> entries = jarFile.entries();
-        while (entries.hasMoreElements()) {
-            try {
-                JarEntry jarEntry = entries.nextElement();
-
-                String entryName = jarEntry.getName().replace("/", ".");
-                entryName = entryName.substring(0, entryName.lastIndexOf("."));
-                boolean startsWith = startsWith(entryName);
-
-                String finallyName = jarEntry.getName();
-
-                for (Map.Entry<String, String> relocate : relocates.entrySet()) {
-                    String string = finallyName.replaceFirst(relocate.getKey(), relocate.getValue());
-                    if (!finallyName.equals(string)) {
-                        finallyName = string;
-                        break;
-                    }
-                }
-
-                if (jarEntry.getName().startsWith("META-INF/") || !jarEntry.getName().endsWith(".class")) {
-                    if (startsWith) {
-                        jarOutputStream.putNextEntry(new JarEntry(finallyName.replace(".", "/").replace("/class", ".class")));
-                    } else {
-                        jarOutputStream.putNextEntry(jarEntry);
-                    }
-                    jarOutputStream.write(IO.readInputStream(jarFile.getInputStream(jarEntry)));
-                    continue;
-                }
-
-                ClassReader classReader = new ClassReader(jarFile.getInputStream(jarEntry));
-                ClassWriter classWriter = new ClassWriter(classReader, 0);
-
-                ClassVisitor classVisitor = new RelocateClassVisitor(classWriter, relocates);
-                classReader.accept(classVisitor, ClassReader.SKIP_DEBUG);
-
-                byte[] bytes = classWriter.toByteArray();
-
-                if (startsWith) {
-                    jarOutputStream.putNextEntry(new JarEntry(finallyName.replace(".", "/").replace("/class", ".class")));
-                } else {
-                    jarOutputStream.putNextEntry(jarEntry);
-                }
-                jarOutputStream.write(bytes);
-
-//                jarEntry.setExtra(bytes);
-            } catch (Throwable ignored) {
-                return false;
-            }
+            jarRelocator.run();
+            IO.deepDelete(input);
+            result = true;
+        } catch (Throwable t) {
+            result = false;
         }
 
-        try {
-            jarFile.close();
-            IO.deepDelete(coped);
-            jarOutputStream.flush();
-            jarOutputStream.close();
-            fileOutputStream.close();
-        } catch (IOException ignored) {
-            return false;
-        }
-
-        return true;
+        return result;
     }
 
     public String getFullName() {
