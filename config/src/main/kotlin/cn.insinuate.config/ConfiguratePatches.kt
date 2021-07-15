@@ -1,4 +1,4 @@
-package cn.insinuate.config
+package io.insinuate.config
 
 import org.spongepowered.configurate.ScopedConfigurationNode
 import org.spongepowered.configurate.loader.AbstractConfigurationLoader

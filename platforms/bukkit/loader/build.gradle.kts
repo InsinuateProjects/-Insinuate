@@ -1,7 +1,9 @@
+import org.jetbrains.kotlin.gradle.targets.js.npm.includedRange
+
 plugins {
     java
     kotlin("jvm")
-    id("com.github.johnrengelman.shadow")
+    id("io.insinuate.gradle.build.shadowPublishing")
 }
 
 repositories {
@@ -15,8 +17,8 @@ repositories {
 
 dependencies {
     compileOnly(project(":core"))
-    implementation(project(":global-loader"))
+    implementation(project(":platforms:global:global-loader"))
     implementation(project(":utils"))
-    compileOnly("org.spigotmc:spigot-api:1.16.5-R0.1-SNAPSHOT")
+    compileOnly("org.spigotmc:spigot-api:1.17.1-R0.1-SNAPSHOT")
     compileOnly("me.clip:placeholderapi:2.10.9")
 }

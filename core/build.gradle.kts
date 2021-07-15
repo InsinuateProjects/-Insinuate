@@ -1,7 +1,7 @@
 plugins {
     java
     kotlin("jvm")
-    id("cn.insinuate.gradle.build.publishing")
+    id("io.insinuate.gradle.build.publishing")
 }
 
 repositories {
@@ -10,5 +10,4 @@ repositories {
 }
 
 dependencies {
-    testImplementation("junit", "junit", "4.12")
 }
