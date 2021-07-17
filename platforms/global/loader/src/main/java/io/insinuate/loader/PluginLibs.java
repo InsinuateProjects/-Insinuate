@@ -1,13 +1,17 @@
 package io.insinuate.loader;
 
 import io.insinuate.utils.Pair;
+import io.insinuate.utils.loader.CoreLoader;
 import io.insinuate.utils.maven.MavenArtifact;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 public class PluginLibs {
+
+    public static final File libsFolder = MavenArtifact.libsFolder;
     public final List<MavenArtifact> artifacts;
 
     public PluginLibs() {
@@ -18,7 +22,7 @@ public class PluginLibs {
         this.artifacts = artifacts;
     }
 
-    public boolean process() {
+    public boolean getFromNetwork() {
         for (MavenArtifact artifact : artifacts) {
             if (artifact.file.exists()) {
                 continue;
@@ -29,11 +33,20 @@ public class PluginLibs {
                 return false;
             }
 
-            /*System.out.println("[Insinuate | Inf] 正在转移 " + artifact.artifactId + "-" + artifact.version + " 的 packages.");
+            System.out.println("[Insinuate | Inf] 正在转移 " + artifact.artifactId + "-" + artifact.version + " 的 packages.");
             if (!artifact.relocate()) {
                 System.err.println("[Insinuate | Err] 转移 " + artifact.artifactId + "-" + artifact.version + " 的 packages 发生错误, 请反馈以上错误信息.");
                 return false;
-            }*/
+            }
+        }
+        return true;
+    }
+
+    public boolean include(ClassLoader loader) {
+        for (MavenArtifact artifact : artifacts) {
+            if (!CoreLoader.addPath(artifact.file, loader)) {
+                return false;
+            }
         }
         return true;
     }

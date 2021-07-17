@@ -9,16 +9,14 @@ repositories {
     mavenLocal()
     maven("https://repo.codemc.io/repository/maven-snapshots/")
     maven("https://repo.codemc.io/repository/maven-public/")
-    maven("https://hub.spigotmc.org/nexus/content/repositories/snapshots/")
-    maven("https://repo.extendedclip.com/content/repositories/placeholderapi")
+    maven("https://repo.opencollab.dev/maven-snapshots/")
 }
 
 dependencies {
     compileOnly(project(":core"))
     implementation(project(":platforms:global:global-loader"))
     implementation(project(":utils"))
-    compileOnly("org.spigotmc:spigot-api:1.17.1-R0.1-SNAPSHOT")
-    compileOnly("me.clip:placeholderapi:${Versions.placeholderapiVersion}")
+    compileOnly("cn.nukkit:nukkit:1.0-SNAPSHOT")
 }
 
 tasks.shadowJar {

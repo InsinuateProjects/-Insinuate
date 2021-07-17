@@ -8,6 +8,7 @@ plugins {
 }
 
 val options = PublishOptions(rootProject)
+val archiveName = "insinuate-${name.toLowerCase()}"
 
 tasks {
     val sourceJar by registering(Jar::class) {
@@ -28,8 +29,11 @@ tasks.withType<ShadowJar> {
 
 publishing {
     publications {
-        create<MavenPublication>(project.name) {
+        create<MavenPublication>("shadow") {
+            artifactId = archiveName
+            version = "${rootProject.version}"
             project.shadow.component(this)
+            artifact(tasks.getByName("sourceJar"))
         }
     }
     repositories {

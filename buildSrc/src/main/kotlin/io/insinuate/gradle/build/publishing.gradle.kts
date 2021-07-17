@@ -7,6 +7,7 @@ plugins {
 }
 
 val options = PublishOptions(rootProject)
+val archiveName = "insinuate-${name.toLowerCase()}"
 
 tasks {
     val sourceJar by registering(Jar::class) {
@@ -28,7 +29,7 @@ tasks.withType<Jar> {
 configure<PublishingExtension> {
     publications {
         create<MavenPublication>("mavenPublish") {
-            artifactId = options.archiveName
+            artifactId = archiveName
             version = "${rootProject.version}"
             from(components.getByName("java"))
             artifact(tasks.getByName("sourceJar"))

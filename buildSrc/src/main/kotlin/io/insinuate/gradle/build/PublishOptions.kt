@@ -8,15 +8,18 @@ import java.net.URI
 class PublishOptions(rootProject: Project) {
     val url = "http://repo.insinuate.cn/repository"
     val uri by lazy { if ("${rootProject.version}".endsWith("-SNAPSHOT")) URI("${url}/maven-snapshots/") else URI("${url}/maven-releases/") }
-    val archiveName = "insinuate-${rootProject.name.toLowerCase()}"
 
     companion object {
         val accessFile = File("access.txt")
-
         val username: String
         val password: String
+        val gitee_username: String
+        val gitee_password: String
+        val downloaderRepository: String = "https://gitee.com/InsinuateProjects/InsinuateDownload.git"
+        val downloaderFolder: File = File("gitee/InsinuateProjects/InsinuateDownload")
 
         init {
+            downloaderFolder.mkdirs()
             if (!accessFile.exists()) {
                 accessFile.writeText("""
                 your_username
@@ -26,6 +29,8 @@ class PublishOptions(rootProject: Project) {
             accessFile.readLines().let {
                 username = it[0]
                 password = it[1]
+                gitee_username = it[0]
+                gitee_password = it[1]
             }
             println("[INSINUATE | NEXUS] From file 'access.txt' loaded access '$username'(username)!")
         }

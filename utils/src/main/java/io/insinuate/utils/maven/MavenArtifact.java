@@ -31,6 +31,8 @@ public class MavenArtifact {
 
     public File file;
 
+    public static final File libsFolder = new File(".insinuate/libs");
+
     private final List<String> defaultRepositories = Arrays.asList(
             "https://repo.maven.apache.org/maven2",
             "https://repo1.maven.org/maven2/",
@@ -46,14 +48,13 @@ public class MavenArtifact {
     public MavenArtifact(String groupId, String artifactId, String version, List<Relocation> relocates, String... repositories) {
         this(null, groupId, artifactId, version, relocates, repositories);
     }
-
     public MavenArtifact(File folder, String groupId, String artifactId, String version, Relocation relocate, String... repositories) {
         this(folder, groupId, artifactId, version, Arrays.asList(relocate), repositories);
     }
     public MavenArtifact(File folder, String groupId, String artifactId, String version, List<Relocation> relocates, String... repositories) {
         this.relocates = relocates;
         if (folder == null) {
-            this.folder = new File(".insinuate/libs/other");
+            this.folder = new File(libsFolder, "other");
         } else {
             this.folder = folder;
         }
@@ -87,20 +88,7 @@ public class MavenArtifact {
         this(folder, combined, Arrays.asList(relocate), repositories);
     }
     public MavenArtifact(File folder, String combined, List<Relocation> relocates, String... repositories) {
-        this.relocates = relocates;
-        if (folder == null) {
-            this.folder = new File(".insinuate/libs");
-        } else {
-            this.folder = folder;
-        }
-        String[] split = combined.split(":");
-        this.groupId = split[0];
-        this.artifactId = split[1];
-        this.version = split[2];
-        file = new File(folder, artifactId + "-" + version + ".jar");
-
-        this.repositories.addAll(Arrays.asList(repositories));
-        this.repositories.addAll(defaultRepositories);
+        this(folder, combined.split(":")[0], combined.split(":")[1], combined.split(":")[2], relocates, repositories);
     }
 
     public String toURL(String repository) {
@@ -130,8 +118,6 @@ public class MavenArtifact {
                 version + "/" +
                 artifactId + "-" + version + ".jar";
     }
-
-
 
     public boolean download(String repository) {
         try {

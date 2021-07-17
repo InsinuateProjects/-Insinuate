@@ -4,6 +4,7 @@ import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.net.URLConnection;
 import java.nio.channels.FileChannel;
 import java.util.Arrays;
 import java.util.List;
@@ -76,6 +77,36 @@ public class IO {
             channelIn.transferTo(0, channelIn.size(), channelOut);
         } catch (IOException t) {
             t.printStackTrace();
+        }
+    }
+
+    public InputStream getResource(ClassLoader classLoader, String path) {
+        try {
+            URL url = classLoader.getResource(path);
+            if (url == null) {
+                return null;
+            }
+            URLConnection connection = url.openConnection();
+            connection.setUseCaches(false);
+            return connection.getInputStream();
+        } catch (IOException ex) {
+            return null;
+        }
+    }
+
+    public boolean saveResource(ClassLoader classLoader, String path, File saveAs) {
+        if (saveAs.exists()) {
+            return true;
+        }
+        saveAs.getParentFile().mkdirs();
+        try {
+            FileOutputStream fileOutputStream = new FileOutputStream(saveAs);
+            fileOutputStream.write(readInputStream(getResource(classLoader, path)));
+            fileOutputStream.close();
+            return true;
+        } catch (Throwable e) {
+            e.printStackTrace();
+            return false;
         }
     }
 

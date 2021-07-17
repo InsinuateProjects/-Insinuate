@@ -5,7 +5,7 @@ inline fun setupSubproject(name: String, block: ProjectDescriptor.() -> Unit = {
     project(name).apply(block)
 }
 
-include(":core", ":utils", ":config")
+include(":core", ":utils", ":config", ":api", ":all")
 
 arrayOf("bukkit", "bungee", "sponge", "velocity", "nukkit", "global").forEach {
     setupSubproject(":platforms:$it")

@@ -4,9 +4,11 @@ plugins {
 //    id("com.github.johnrengelman.shadow") version "7.0.0" apply false
 }
 
+defaultTasks = mutableListOf("jar", "shadowJar")
+
 allprojects {
     group = "io.insinuate"
-    version = "0.1.0".let {
+    version = Versions.insinuateVersion.let {
         try {
             rootProject.tasks.getByName("release")
             return@let it

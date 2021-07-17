@@ -1,4 +1,5 @@
 plugins {
+    java
     kotlin("jvm")
     id("io.insinuate.gradle.build.publishing")
 }
@@ -9,4 +10,7 @@ repositories {
 }
 
 dependencies {
+    implementation(project(":config"))
+    implementation(project(":core"))
+    implementation(project(":utils"))
 }
