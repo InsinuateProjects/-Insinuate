@@ -24,15 +24,18 @@ class PublishOptions(rootProject: Project) {
                 accessFile.writeText("""
                 your_username
                 your_password
+                your_gitee_username
+                your_gitee_password
             """.trimIndent())
             }
             accessFile.readLines().let {
                 username = it[0]
                 password = it[1]
+                println("[INSINUATE | NEXUS] From file 'access.txt' loaded access '$username'(username)!")
                 gitee_username = it[0]
                 gitee_password = it[1]
+                println("[INSINUATE | NEXUS] From file 'access.txt' loaded access '$gitee_username'(gitee_username)!")
             }
-            println("[INSINUATE | NEXUS] From file 'access.txt' loaded access '$username'(username)!")
         }
     }
 }

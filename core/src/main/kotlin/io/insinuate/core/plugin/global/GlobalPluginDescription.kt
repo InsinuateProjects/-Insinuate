@@ -1,13 +1,9 @@
-package io.insinuate.core.plugin
+package io.insinuate.core.plugin.global
 
-interface PluginDescription {
+interface GlobalPluginDescription {
 
     val name: String
     val version: String
     val description: String
     val authors: Array<String>
-
-    companion object {
-
-    }
 }

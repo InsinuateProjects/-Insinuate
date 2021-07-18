@@ -1,6 +1,7 @@
 package io.insinuate.gradle.build
 
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+import org.gradle.api.provider.Property
 
 plugins {
     id("maven-publish")
@@ -23,6 +24,7 @@ tasks.withType<ShadowJar> {
         exclude(dependency("org.jetbrains.kotlin:kotlin-stdlib"))
         exclude(dependency("org.jetbrains.kotlin:kotlin-stdlib-common"))
     }
+
 
     archiveClassifier.set(null)
 }

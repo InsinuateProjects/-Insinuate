@@ -9,4 +9,6 @@ repositories {
 }
 
 dependencies {
+    implementation(project(":config"))
+    compileOnly("org.spongepowered:configurate-yaml:4.0.0")
 }

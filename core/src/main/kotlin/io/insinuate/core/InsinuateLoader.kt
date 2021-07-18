@@ -5,4 +5,8 @@ import java.io.File
 class InsinuateLoader(
     val bootClassLoader: ClassLoader,
     val insinuateFolder: File
-)
+) {
+    companion object {
+
+    }
+}

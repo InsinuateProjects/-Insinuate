@@ -14,7 +14,7 @@ dependencies {
     compileOnly(project(":core"))
     implementation(project(":platforms:global:global-loader"))
     implementation(project(":utils"))
-    compileOnly("org.spongepowered:spongeapi:7.3.0")
+    compileOnly("org.spongepowered:spongeapi:7.4.0")
 }
 
 tasks.shadowJar {
