@@ -1,10 +1,13 @@
 package io.insinuate.loader;
 
+import io.insinuate.core.Insinuate;
 import io.insinuate.utils.Pair;
 import io.insinuate.utils.loader.CoreLoader;
 import io.insinuate.utils.maven.MavenArtifact;
 
 import java.io.File;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -51,12 +54,22 @@ public class PluginLibs {
         return true;
     }
 
-    public static boolean isCoreLoaded() {
+    public static boolean isCoreLoaded(ClassLoader loader) {
         try {
-            Class.forName("io.insinuate.core.Insinuate");
+            Class.forName("io.insinuate.core.Insinuate", false, loader);
             return true;
         } catch (Throwable ignored) {
             return false;
+        }
+    }
+
+    public static String getCoreVersion(ClassLoader loader) {
+        try {
+            Class<?> insinuateClass = Class.forName("io.insinuate.core.Insinuate", true, loader);
+            Method version = insinuateClass.getMethod("getVersion", String.class);
+            return (String) version.invoke(insinuateClass.getField("INSTANCE").get(null));
+        } catch (Throwable ignored) {
+            return null;
         }
     }
 }

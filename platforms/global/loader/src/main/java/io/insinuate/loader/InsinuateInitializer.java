@@ -31,7 +31,7 @@ public class InsinuateInitializer {
     private static final PluginLibs insinuateCores = new PluginLibs(
             Arrays.asList(
                     new MavenArtifact(new File(MavenArtifact.libsFolder, "core"),
-                            "io.insinuate:Insinuate-all:0.1.0",
+                            "io.insinuate:Insinuate-all:0.11",
                             "https://gitee.com/InsinuateProjects/InsinuateDownload/raw/master/"
                     )
             ));
@@ -53,7 +53,14 @@ public class InsinuateInitializer {
         } else {
             System.out.println("[Insinuate | Inf] 再次尝试进行下载...");
         }
-        if (!insinuateCores.include(bootLoader)) {
+        ClassLoader coreLoader;
+        if (PluginLibs.isCoreLoaded(bootLoader)) {
+            coreLoader = bootPlugin.getPluginClassLoader();
+        } else {
+            coreLoader = bootLoader;
+        }
+
+        if (!insinuateCores.include(coreLoader)) {
             System.err.println("[Insinuate | Err] Insinuate 本体导入失败, 启动失败!");
         }
 

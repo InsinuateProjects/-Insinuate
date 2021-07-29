@@ -1,4 +1,5 @@
 import org.gradle.api.Project
+import org.gradle.jvm.tasks.Jar
 import java.io.File
 import java.util.*
 import kotlin.streams.asSequence
@@ -90,3 +91,7 @@ fun Project.gitHash(repo: File): String =
         gitCmd("rev-parse", "HEAD", dir = repo).output ?: ""
 
 val jenkins = System.getenv("JOB_NAME") != null
+
+fun Jar.relocate(origin: String, target: String) {
+
+}

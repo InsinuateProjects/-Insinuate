@@ -11,14 +11,14 @@ interface InsinuatePluginDescription : GlobalPluginDescription {
     val velocitySupport: Boolean
 
     companion object {
-
+/*
         @JvmStatic
         fun readFromResource(classLoader: ClassLoader): GlobalPluginDescription {
             String(classLoader.getResourceAsStream("insinuate-plugin.yml").readBytes())
 
 
 
-        }
+        }*/
 
     }
 }
